@@ -50,7 +50,7 @@
 #define SERIAL_SPEED        115200         // speed for serial port
 
 #define SERIAL_BUFFER_SIZE  32             // buffer size for serial commands
-#define COLOR_BUFFER_SIZE   (NUM_LEDS * 3) // buffer size for colors and pins
+#define COLOR_BUFFER_SIZE   (NUM_LEDS * 3) // buffer size for colors
 
 // -----------------------------------------------------------------------------
 // GLOBALS
