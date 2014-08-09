@@ -1,7 +1,7 @@
 #include <SoftPWM.h>
 #include <TimerOne.h>
 
-// 
+//
 // RGB LED (common anode)
 // ----------------------
 //
@@ -22,8 +22,8 @@
 // The SoftPWM library is used to enable PWM on the used pins and since the LEDs
 // are common anode, the library is initialized with SOFTPWM_INVERTED.
 //
-// The TimerOne library is used with a callback function that will set the 
-// color on the LEDs. The interval for the timer is 10ms which allows for a 
+// The TimerOne library is used with a callback function that will set the
+// color on the LEDs. The interval for the timer is 10ms which allows for a
 // refresh rate of 100Hz.
 //
 // SerialLed protocol:
@@ -33,7 +33,7 @@
 //
 // wXXX-R1R1R1G1G1G1B1B1B1-R2R2R2G2G2G2B2B2B2\n
 //   w      -> Write color, can be upper case
-//   XXX    -> LED number, 0 <= x <= 255. 
+//   XXX    -> LED number, 0 <= x <= 255.
 //   R1R1R1 -> Red value of first color, 0 <= r <= 255
 //   G1G1G1 -> Green value of first color, 0 <= g <= 255
 //   B1B1B1 -> Blue value of first color, 0 <= b <= 255
@@ -42,7 +42,7 @@
 //   B2B2B2 -> Blue value of second color, 0 <= b <= 255
 //
 // dTTTTT\n
-//   d      -> Set delay between toggles in ms, can be upper case 
+//   d      -> Set delay between toggles in ms, can be upper case
 //             500ms ^= 2 toggles/s
 //   TTTTT  -> Delay in milliseconds, 100 <= t <= 65535
 //
@@ -53,8 +53,8 @@
 //   m      -> Set display mode, can be upper case
 //   X      -> 0 to turn off, 1 to turn on
 //
-// response is !\n on success, ?\n on error. 
-// 
+// response is !\n on success, ?\n on error.
+//
 
 // -----------------------------------------------------------------------------
 // DEFINES
@@ -80,7 +80,7 @@ byte colorMode;
 word toggleDelay;
 byte displayMode;
 
-byte pinBuffer[COLOR_BUFFER_SIZE] = 
+byte pinBuffer[COLOR_BUFFER_SIZE] =
   { 9, 11, 10,    // LED 0, r-b-g
     6,  8,  7,    // LED 1, r-b-g
     3,  5,  4     // LED 2, r-b-g
@@ -93,7 +93,7 @@ byte value(char c)
 {
   // convert digit
   byte val = 0;
-  
+
   if (c >= '0')
   {
     if (c <= '9')
@@ -101,7 +101,7 @@ byte value(char c)
       val = c - '0';
     }
   }
-  
+
   return val;
 }
 
@@ -114,7 +114,7 @@ byte value(char c1, char c2, char c3)
 word value(char c1, char c2, char c3, char c4, char c5)
 {
   // convert 5 digit number
-  return value(c1) * 10000 + value(c2) * 1000 + value(c3) * 100 
+  return value(c1) * 10000 + value(c2) * 1000 + value(c3) * 100
        + value(c4) * 10 + value(c5);
 }
 
@@ -125,10 +125,10 @@ void clearSerialBuffer()
   {
     serialBuffer[i] = 0;
   }
-  
+
   serialBufferIndex = 0;
 }
-  
+
 void clearColorBuffer()
 {
   // clear both color buffers
@@ -147,9 +147,9 @@ void setColorFromSerialBuffer()
   byte index = value(serialBuffer[1], serialBuffer[2], serialBuffer[3]);
 
   if (index < NUM_LEDS)
-  {  
+  {
     index *= 3;
-    
+
     // colors
     byte r1 = value(serialBuffer[ 5], serialBuffer[ 6], serialBuffer[ 7]);
     byte g1 = value(serialBuffer[ 8], serialBuffer[ 9], serialBuffer[10]);
@@ -163,7 +163,7 @@ void setColorFromSerialBuffer()
     colorBuffer[0][index    ] = r1;
     colorBuffer[0][index + 1] = g1;
     colorBuffer[0][index + 2] = b1;
-  
+
     colorBuffer[1][index    ] = r2;
     colorBuffer[1][index + 1] = g2;
     colorBuffer[1][index + 2] = b2;
@@ -173,9 +173,9 @@ void setColorFromSerialBuffer()
 void setDelayFromSerialBuffer()
 {
   // convert delay
-  toggleDelay = value(serialBuffer[1], serialBuffer[2], serialBuffer[3], 
+  toggleDelay = value(serialBuffer[1], serialBuffer[2], serialBuffer[3],
                       serialBuffer[4], serialBuffer[5]);
-  
+
   if (toggleDelay < MIN_DELAY)
   {
     // cap to minimum
@@ -192,7 +192,7 @@ void setDisplayModeFromSerialBuffer()
 void processCommand()
 {
   char response = '!';
-  
+
   // parse serial buffer for command
   switch (serialBuffer[0])
   {
@@ -220,10 +220,10 @@ void processCommand()
     response = '?';
     break;
   }
-  
+
   // write response
   Serial.println(response);
-  
+
   // clear serial buffer
   clearSerialBuffer();
 }
@@ -237,7 +237,7 @@ void callback()
     {
       // output current color
       SoftPWMSet(pinBuffer[i], int(colorBuffer[colorMode][i]));
-    }    
+    }
   }
   else
   {
@@ -245,7 +245,7 @@ void callback()
     for (int i = 0; i < COLOR_BUFFER_SIZE; ++i)
     {
       SoftPWMSet(pinBuffer[i], int(0));
-    }    
+    }
   }
 }
 
@@ -253,13 +253,13 @@ void setup()
 {
   // clear serial buffer
   clearSerialBuffer();
-  
+
   // clear color buffer
   clearColorBuffer();
-  
+
   // initialize PWM library
   SoftPWMBegin(SOFTPWM_INVERTED);
-  
+
   for (int i = 0; i < COLOR_BUFFER_SIZE; ++i)
   {
     SoftPWMSet(pinBuffer[i], 0);
@@ -273,10 +273,10 @@ void setup()
   colorMode = 0;
   toggleDelay = DEFAULT_DELAY;
   displayMode = 0;
-  
+
   // setup serial port
   Serial.begin(SERIAL_SPEED);
-  
+
   // report ready
   Serial.println("!");
 }
@@ -284,16 +284,16 @@ void setup()
 void loop()
 {
   unsigned long startTime = millis();
-  
+
   // look for new serial data
   while (Serial.available())
   {
     char c = Serial.read();
-    
+
     // store char in serial buffer
     serialBuffer[serialBufferIndex] = c;
     ++serialBufferIndex;
-    
+
     // 0x0A or 0x0D signals end of command
     if ((c == 13) || (c == 10) || (serialBufferIndex >= SERIAL_BUFFER_SIZE))
     {
@@ -302,15 +302,15 @@ void loop()
       break;
     }
   }
-  
+
   // wait until toggle delay has passed
   long waitTime = toggleDelay - long(millis() - startTime);
-  
+
   if (waitTime > 0)
   {
     delay(waitTime);
   }
-  
+
   // toggle delay has passed, switch color buffer
   colorMode ^= 1;
 }
