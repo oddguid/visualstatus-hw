@@ -54,6 +54,9 @@
 
 #define SERIAL_SPEED        115200         // speed for serial port
 
+#define STRIP_BRG           0              // set to 0 if LED strip is common
+                                           // GRB, set to 1 for BRG strip
+
 #define SERIAL_BUFFER_SIZE  32             // buffer size for serial commands
 #define COLOR_BUFFER_SIZE   (NUM_LEDS * 3) // buffer size for colors
 
@@ -270,7 +273,13 @@ void loop()
       byte b = colorBuffer[colorMode][index++];
 
       // update pixel
+#if STRIP_BRG > 0
+      // LPD8806 library expects GRB LED strips: swap green and
+      // blue for BRG LED strips
+      strip.setPixelColor(i, r, b, g);
+#else
       strip.setPixelColor(i, r, g, b);
+#endif
     }
   }
   else
