@@ -36,7 +36,7 @@ struct RECEIVE_DATA_STRUCTURE
   byte rgb[COLOR_BUFFER_SIZE];             // RGB triplets
 };
 
-RECEIVE_DATA_STRUCTURE colorBuffer;
+RECEIVE_DATA_STRUCTURE receiveBuffer;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, NEO_PIN,
                                             NEO_GRB + NEO_KHZ800);
@@ -54,9 +54,9 @@ void setColorFromBuffer()
 
   for (byte i = 0; i < NUM_LEDS; ++i)
   {
-    byte r = colorBuffer.rgb[index++];
-    byte g = colorBuffer.rgb[index++];
-    byte b = colorBuffer.rgb[index++];
+    byte r = receiveBuffer.rgb[index++];
+    byte g = receiveBuffer.rgb[index++];
+    byte b = receiveBuffer.rgb[index++];
 
     // update pixel
     strip.setPixelColor(i, r, g, b);
@@ -75,7 +75,7 @@ void setup()
   Serial.begin(SERIAL_SPEED);
 
   // setup EasyTransfer
-  easyTransfer.begin(details(colorBuffer), &Serial);
+  easyTransfer.begin(details(receiveBuffer), &Serial);
 
   // report ready
   Serial.println("!");
