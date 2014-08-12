@@ -224,7 +224,7 @@ void setup()
   // clear color buffer
   clearColorBuffer();
 
-  // initialize NeoPixel shield, all pixels 'off'
+  // initialize LPD8806 strip, all pixels 'off'
   strip.begin();
   strip.show();
 
